@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Snake-Game-2.0.sln
+/Snake-Game-2.0.vcxproj
+/Snake-Game-2.0.vcxproj.filters
