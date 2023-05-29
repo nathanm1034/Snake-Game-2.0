@@ -2,6 +2,7 @@
 
 #include "state.h"
 #include "mainMenu.h"
+#include "gameContainer.h"
 
 #include <memory>
 #include <SFML/Graphics.hpp>
@@ -10,8 +11,7 @@ using namespace std;
 
 class Game {
 private: 
-    unique_ptr<sf::RenderWindow> window;
-	shared_ptr<StateManager> stateManager;
+	shared_ptr<GameContainer> gameContainer;
 
 public:
 	Game();

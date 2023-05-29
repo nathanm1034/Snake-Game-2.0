@@ -1,7 +1,7 @@
 #include "../include/mainMenu.h"
 
-MainMenu::MainMenu() {
-	cout << "working" << endl;
+MainMenu::MainMenu(shared_ptr<GameContainer>& gameContainer) 
+	: gameContainer(gameContainer) {
 }
 
 MainMenu::~MainMenu() {
@@ -9,13 +9,20 @@ MainMenu::~MainMenu() {
 }
 
 void MainMenu::handleInput() {
-	cout << "main handle" << endl;
+	sf::Event event;
+
+	while (gameContainer->window->pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			gameContainer->window->close();
+		}
+	}
 }
 
 void MainMenu::update() {
-	cout << "main update" << endl;
+	
 }
 
 void MainMenu::render() {
-	cout << "main render" << endl;
+	gameContainer->window->clear();
+	gameContainer->window->display();
 }
