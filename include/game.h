@@ -1,18 +1,21 @@
 #pragma once
 
+#include "state.h"
+#include "mainMenu.h"
+
 #include <memory>
 #include <SFML/Graphics.hpp>
 
 using namespace std;
 
-class game {
+class Game {
 private: 
     unique_ptr<sf::RenderWindow> window;
-    sf::Event event;
+	shared_ptr<StateManager> stateManager;
 
 public:
-	game();
-	~game();
+	Game();
+	~Game();
 
 	void open();
 };

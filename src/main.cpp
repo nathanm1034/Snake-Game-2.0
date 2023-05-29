@@ -6,7 +6,7 @@
 //#include <SFML/Network.hpp>
 
 int main() {
-    game game;
+    Game game;
     game.open();
 
     return 0;
