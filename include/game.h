@@ -1,8 +1,8 @@
 #pragma once
 
+#include "gameContainer.h"
 #include "state.h"
 #include "mainMenu.h"
-#include "gameContainer.h"
 
 #include <memory>
 #include <SFML/Graphics.hpp>

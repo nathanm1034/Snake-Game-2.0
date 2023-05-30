@@ -1,7 +1,8 @@
 #pragma once
 
-#include "state.h"
 #include "gameContainer.h"
+#include "state.h"
+#include "assetManager.h"
 
 
 class MainMenu : public State {
@@ -12,6 +13,7 @@ public:
 	MainMenu(shared_ptr<GameContainer>& gameContainer);
 	~MainMenu();
 
+	void init() override;
 	void handleInput() override;
 	void update() override;
 	void render() override;

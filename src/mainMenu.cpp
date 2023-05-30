@@ -8,6 +8,10 @@ MainMenu::~MainMenu() {
 
 }
 
+void MainMenu::init() {
+	gameContainer->assetManager->loadFont("MAIN-FONT");
+}
+
 void MainMenu::handleInput() {
 	sf::Event event;
 
