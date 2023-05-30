@@ -12,13 +12,14 @@ using namespace std;
 
 class AssetManager {
 private:
-	unordered_map<int, unique_ptr<sf::Font>> fonts;
+	unordered_map<string, unique_ptr<sf::Font>> fonts;
 
 public:
 	AssetManager();
 	~AssetManager();
 
 	void loadFont(string key);
-	//sf::Font& getFont();
+
+	sf::Font& getFont(string key);
 };
 

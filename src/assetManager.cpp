@@ -13,13 +13,10 @@ void AssetManager::loadFont(string key) {
 	unique_ptr<sf::Font> font = make_unique<sf::Font>();
 
 	if (font->loadFromFile(pair->second)) {
-		cout << "success" << endl;
-	}
-	else {
-		cout << "fail" << endl;
+		fonts[key] = move(font);
 	}
 }
 
-//sf::Font& AssetManager::getFont() {
-//
-//}
+sf::Font& AssetManager::getFont(string key) {
+	return *(fonts.at(key).get());
+}
