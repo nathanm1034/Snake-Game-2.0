@@ -4,6 +4,9 @@
 #include "state.h"
 #include "assetManager.h"
 
+#include <vector>
+#include <SFML/Window.hpp>
+
 using namespace std;
 
 class MainMenu : public State {
@@ -13,6 +16,15 @@ private:
 	sf::Text play;
 	sf::Text highScore;
 	sf::Text exit;
+
+	vector<shared_ptr<sf::Text>> menuOptions;
+	sf::Clock keyClock;
+	bool usingMouse;
+	int selectedMenuOption;
+
+	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
+	void handleMouseEvent(sf::Event& event);
+	void handleKeyEvent(sf::Event& event);
 
 public:
 	MainMenu(shared_ptr<GameContainer>& gameContainer);
