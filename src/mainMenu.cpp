@@ -1,67 +1,11 @@
 #include "../include/mainMenu.h"
 
 MainMenu::MainMenu(shared_ptr<GameContainer>& gameContainer) 
-	: gameContainer(gameContainer), selectedMenuOption(-1), usingMouse(false) {
+	: gameContainer(gameContainer), selectedMenuOption(-1), usingMouse(false), paused(false) {
 }
 
 MainMenu::~MainMenu() {
 
-}
-
-void MainMenu::init() {
-	unsigned int baseResolution = 1080;
-	unsigned int currentResolution = gameContainer->window->getSize().y;
-	float scale = static_cast<float>(currentResolution) / baseResolution;
-	float spacing = gameContainer->window->getSize().y / 12.f;
-
-	gameContainer->assetManager->loadFont("MAIN-FONT");
-
-	gameTitle = *initText("Snake Game", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 16.f, static_cast<unsigned int>(108 * scale));
-	play = *initText("Play", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f - spacing, static_cast<unsigned int>(55 * scale));
-	highScore = *initText("High Score", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f, static_cast<unsigned int>(55 * scale));
-	exit = *initText("Exit", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f + spacing, static_cast<unsigned int>(55 * scale));
-
-	menuOptions.push_back(make_shared<sf::Text>(play));
-	menuOptions.push_back(make_shared<sf::Text>(highScore));
-	menuOptions.push_back(make_shared<sf::Text>(exit));
-}
-
-void MainMenu::handleInput() {
-	sf::Event event;
-
-	cout << selectedMenuOption << endl;
-
-	while (gameContainer->window->pollEvent(event)) {
-		if (event.type == sf::Event::Closed) {
-			gameContainer->window->close();
-		}
-		else if (event.type == sf::Event::MouseMoved) {
-			handleMouseEvent(event);
-		} 
-		else if (event.type = sf::Event::KeyPressed) {
-			handleKeyEvent(event);
-		}
-	}
-}
-
-void MainMenu::update() {
-	for (int i = 0; i < menuOptions.size(); i++) {
-		if (i == selectedMenuOption) {
-			menuOptions[i]->setFillColor(sf::Color::Red);
-		}
-		else {
-			menuOptions[i]->setFillColor(sf::Color::White);
-		}
-	}
-}
-
-void MainMenu::render() {
-	gameContainer->window->clear();
-	gameContainer->window->draw(gameTitle);
-	for (auto& text : menuOptions) {
-		gameContainer->window->draw(*text);
-	}
-	gameContainer->window->display();
 }
 
 shared_ptr<sf::Text> MainMenu::initText(const string& textString, float positionX, float positionY, unsigned int charSize) {
@@ -84,6 +28,16 @@ void MainMenu::handleMouseEvent(sf::Event& event) {
 			selectedMenuOption = i;
 			usingMouse = true;
 			hovering = true;
+
+			if (event.mouseButton.button == sf::Mouse::Left) {
+				if (selectedMenuOption == 1) {
+					gameContainer->stateManager->pushState(make_unique<HighScore>(gameContainer));
+				}
+				else if (selectedMenuOption == menuOptions.size() - 1) {
+					gameContainer->window->close();
+				}
+			}
+
 			break;
 		}
 	}
@@ -120,7 +74,119 @@ void MainMenu::handleKeyEvent(sf::Event& event) {
 		}
 		keyClock.restart();
 		break;
+	case sf::Keyboard::Enter:
+		if (selectedMenuOption == 1) {
+			gameContainer->stateManager->pushState(make_unique<HighScore>(gameContainer));
+			keyClock.restart();
+		}
+		else if (selectedMenuOption == menuOptions.size() - 1) {
+			gameContainer->window->close();
+		}
+		break;
 	default:
 		break;
 	}
+}
+
+void MainMenu::init() {
+	unsigned int baseResolution = 1080;
+	unsigned int currentResolution = gameContainer->window->getSize().y;
+	float scale = static_cast<float>(currentResolution) / baseResolution;
+	float spacing = gameContainer->window->getSize().y / 12.f;
+
+	gameContainer->assetManager->loadFont("MAIN-FONT");
+
+	gameTitle = *initText("Snake Game", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 16.f, static_cast<unsigned int>(108 * scale));
+	play = *initText("Play", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f - spacing, static_cast<unsigned int>(55 * scale));
+	highScore = *initText("High Score", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f, static_cast<unsigned int>(55 * scale));
+	exit = *initText("Exit", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f + spacing, static_cast<unsigned int>(55 * scale));
+
+	menuOptions.push_back(make_shared<sf::Text>(play));
+	menuOptions.push_back(make_shared<sf::Text>(highScore));
+	menuOptions.push_back(make_shared<sf::Text>(exit));
+}
+
+void MainMenu::handleInput() {
+	if (paused) return;
+
+	sf::Event event;
+
+	while (gameContainer->window->pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			gameContainer->window->close();
+		}
+		else if (event.type == sf::Event::MouseMoved || event.type == sf::Event::MouseButtonPressed) {
+			handleMouseEvent(event);
+		} 
+		else if (event.type = sf::Event::KeyPressed) {
+			handleKeyEvent(event);
+		}
+	}
+}
+
+void MainMenu::update() {
+	if (paused) return;
+
+	for (int i = 0; i < menuOptions.size(); i++) {
+		if (i == selectedMenuOption) {
+			menuOptions[i]->setFillColor(sf::Color::Red);
+		}
+		else {
+			menuOptions[i]->setFillColor(sf::Color::White);
+		}
+	}
+}
+
+void MainMenu::render() {
+	gameContainer->window->clear();
+	gameContainer->window->draw(gameTitle);
+	for (auto& text : menuOptions) {
+		gameContainer->window->draw(*text);
+	}
+	gameContainer->window->display();
+}
+
+void MainMenu::pause() {
+	cout << "paused" << endl;
+	paused = true;
+}
+
+void MainMenu::resume() {
+	cout << "resuming" << endl;
+	paused = false;
+}
+
+
+
+HighScore::HighScore(shared_ptr<GameContainer>& gameContainer) 
+	:gameContainer(gameContainer) {
+}
+
+HighScore::~HighScore() {
+
+}
+
+void HighScore::init() {
+	cout << "Entered high score state" << endl;
+}
+
+void HighScore::handleInput() {
+	sf::Event event;
+
+	while (gameContainer->window->pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			gameContainer->window->close();
+		}
+		else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+			gameContainer->stateManager->popState();
+		}
+	}
+}
+
+void HighScore::update() {
+
+}
+
+void HighScore::render() {
+
 }

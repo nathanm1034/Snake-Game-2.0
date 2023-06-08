@@ -1,28 +1,39 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 class State {
 public:
 	State() {};
-	virtual ~State() {};
+	virtual ~State() {
+		cout << "State destroyed" << endl;
+	};
 
 	virtual void init() = 0;
 	virtual void handleInput() = 0;
 	virtual void update() = 0;
 	virtual void render() = 0;
+	virtual void pause() {};
+	virtual void resume() {};
 };
 
 class StateManager {
 private:
-	unique_ptr<State> currentState;
+	vector<unique_ptr<State>> stateStack;
+	unique_ptr<State> newState;
+	
+	bool push;
+	bool pop;
 	
 public:
 	StateManager();
 	~StateManager();
 
-	void setState(unique_ptr<State> newState);
-	unique_ptr<State>& getState();
+	void pushState(unique_ptr<State> newState);
+	void popState();
+	void changeState();
+	unique_ptr<State>& getCurrentState();
 };

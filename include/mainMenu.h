@@ -20,6 +20,7 @@ private:
 	vector<shared_ptr<sf::Text>> menuOptions;
 	sf::Clock keyClock;
 	bool usingMouse;
+	bool paused;
 	int selectedMenuOption;
 
 	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
@@ -29,6 +30,22 @@ private:
 public:
 	MainMenu(shared_ptr<GameContainer>& gameContainer);
 	~MainMenu();
+
+	void init() override;
+	void handleInput() override;
+	void update() override;
+	void render() override;
+	void pause() override;
+	void resume() override;
+};
+
+class HighScore : public State {
+private:
+	shared_ptr<GameContainer> gameContainer;
+
+public:
+	HighScore(shared_ptr<GameContainer>& gameContainer);
+	~HighScore();
 
 	void init() override;
 	void handleInput() override;

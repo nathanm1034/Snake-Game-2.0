@@ -7,7 +7,7 @@ Game::Game()
     unsigned int windowHeight = desktopMode.height / 2;
 
     gameContainer->window->create(sf::VideoMode(windowWidth, windowHeight), "Snake", (sf::Style::Close));
-    gameContainer->stateManager->setState(make_unique<MainMenu>(gameContainer));
+    gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
 }
 
 Game::~Game() {
@@ -16,10 +16,10 @@ Game::~Game() {
 
 void Game::open() {
     gameContainer->window->setFramerateLimit(60);
-
     while (gameContainer->window->isOpen()) {
-        gameContainer->stateManager->getState()->handleInput();
-        gameContainer->stateManager->getState()->update();
-        gameContainer->stateManager->getState()->render();
+        gameContainer->stateManager->changeState();
+        gameContainer->stateManager->getCurrentState()->handleInput();
+        gameContainer->stateManager->getCurrentState()->update();
+        gameContainer->stateManager->getCurrentState()->render();
     }
 }
