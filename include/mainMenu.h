@@ -6,6 +6,8 @@
 
 #include <vector>
 #include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <Thor/Shapes.hpp>
 
 using namespace std;
 
@@ -42,6 +44,13 @@ public:
 class HighScore : public State {
 private:
 	shared_ptr<GameContainer> gameContainer;
+	sf::ConvexShape popupBody;
+	sf::CircleShape closeBody;
+	sf::Text closeText;
+	sf::Text highScoreTitle;
+	sf::Text highScore;
+
+	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
 
 public:
 	HighScore(shared_ptr<GameContainer>& gameContainer);
@@ -52,4 +61,3 @@ public:
 	void update() override;
 	void render() override;
 };
-

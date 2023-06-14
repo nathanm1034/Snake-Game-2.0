@@ -8,9 +8,7 @@ using namespace std;
 class State {
 public:
 	State() {};
-	virtual ~State() {
-		cout << "State destroyed" << endl;
-	};
+	virtual ~State() {};
 
 	virtual void init() = 0;
 	virtual void handleInput() = 0;
