@@ -50,6 +50,8 @@ private:
 	sf::Text highScoreTitle;
 	sf::Text highScore;
 
+	bool hovering;
+
 	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
 
 public:

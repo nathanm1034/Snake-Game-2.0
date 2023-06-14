@@ -157,7 +157,7 @@ void MainMenu::resume() {
 
 
 HighScore::HighScore(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer) {
+	:gameContainer(gameContainer), hovering(false) {
 }
 
 HighScore::~HighScore() {
@@ -171,14 +171,14 @@ void HighScore::init() {
 	const float maxScaleFactor = max(scaleFactor.x, scaleFactor.y);
 	const float borderThickness = 18.f * maxScaleFactor;
 
-	const float radius = 40.f * maxScaleFactor;
-	const sf::Vector2f closePosition(popupBody.getPosition().x * 1.5f - radius / 2.f, popupBody.getPosition().y / 2.f + radius / 2.f);
-	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
-
 	const sf::Vector2f popupBodySize(windowSize / 2.f);
 	popupBody = thor::Shapes::roundedRect(popupBodySize, 120.f * maxScaleFactor, sf::Color(105, 105, 105), borderThickness, sf::Color::White);
 	popupBody.setOrigin(popupBodySize / 2.f);
 	popupBody.setPosition(windowSize / 2.f);
+
+	const float radius = 40.f * maxScaleFactor;
+	const sf::Vector2f closePosition(popupBody.getPosition().x * 1.5f - radius / 2.f, popupBody.getPosition().y / 2.f + radius / 2.f);
+	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
 
 	closeBody.setRadius(radius);
 	closeBody.setFillColor(sf::Color(105, 105, 105));
@@ -210,6 +210,27 @@ void HighScore::handleInput() {
 		if (event.type == sf::Event::Closed) {
 			gameContainer->window->close();
 		}
+		else if (event.type == sf::Event::MouseMoved || event.type == sf::Event::MouseButtonPressed) {
+			sf::Vector2f mousePosition = gameContainer->window->mapPixelToCoords(sf::Mouse::getPosition(*gameContainer->window));
+			if (closeBody.getGlobalBounds().contains(mousePosition)) {
+				sf::Vector2f buttonCenter = closeBody.getPosition();
+				float radius = closeBody.getRadius();
+				float distance = sqrt((mousePosition.x - buttonCenter.x) * (mousePosition.x - buttonCenter.x) + (mousePosition.y - buttonCenter.y) * (mousePosition.y - buttonCenter.y));
+				if (distance < radius) {
+					hovering = true;
+				}
+				else {
+					hovering = false;
+				}
+
+				if (hovering && event.mouseButton.button == sf::Mouse::Left) {
+					gameContainer->stateManager->popState();
+				}
+			}
+			else {
+				hovering = false;
+			}
+		}
 		else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
 			gameContainer->stateManager->popState();
 		}
@@ -217,7 +238,12 @@ void HighScore::handleInput() {
 }
 
 void HighScore::update() {
-
+	if (hovering) {
+		closeBody.setFillColor(sf::Color::Red);
+	}
+	else {
+		closeBody.setFillColor(sf::Color(105, 105, 105));
+	}
 }
 
 void HighScore::render() {
