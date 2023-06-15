@@ -3,6 +3,7 @@
 #include "gameContainer.h"
 #include "state.h"
 #include "assetManager.h"
+#include "play.h"
 
 #include <vector>
 #include <SFML/Window.hpp>

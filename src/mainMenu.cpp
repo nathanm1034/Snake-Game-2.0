@@ -5,7 +5,7 @@ MainMenu::MainMenu(shared_ptr<GameContainer>& gameContainer)
 }
 
 MainMenu::~MainMenu() {
-
+	
 }
 
 void MainMenu::init() {
@@ -66,7 +66,11 @@ void MainMenu::handleMouseEvent(sf::Event& event) {
 			hovering = true;
 
 			if (event.mouseButton.button == sf::Mouse::Left) {
-				if (selectedMenuOption == 1) {
+				if (selectedMenuOption == 0) {
+					gameContainer->stateManager->popState();
+					gameContainer->stateManager->pushState(make_unique<Play>(gameContainer));
+				}
+				else if (selectedMenuOption == 1) {
 					gameContainer->stateManager->pushState(make_unique<HighScore>(gameContainer));
 				}
 				else if (selectedMenuOption == menuOptions.size() - 1) {
