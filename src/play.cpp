@@ -11,40 +11,16 @@ Play::~Play() {
 }
 
 void Play::init() {
-	if (!gameContainer->assetManager->loadTexture("WALL-ENVIRONMENT")) {
-		cerr << "Failed to load texture: WALL-ENVIRONMENT" << endl;
-		gameContainer->window->close();
-		return;
-	}
-
-	if (!gameContainer->assetManager->loadTexture("GRASS-ENVIRONMENT")) {
-		cerr << "Failed to load texture: GRASS-ENVIRONMENT" << endl;
-		gameContainer->window->close();
-		return;
-	}
-
-	if (!gameContainer->assetManager->loadTexture("FOOD-OBJECT")) {
-		cerr << "Failed to load texture: FOOD-OBJECT" << endl;
-		gameContainer->window->close();
-		return;
-	}
+	loadTextures();
 
 	wall.setTexture(gameContainer->assetManager->getTexture("WALL-ENVIRONMENT"));
 	grass.setTexture(gameContainer->assetManager->getTexture("GRASS-ENVIRONMENT"));
 	food.setTexture(gameContainer->assetManager->getTexture("FOOD-OBJECT"));
 	grid.resize(gridHeight, vector<sf::Sprite>(gridWidth, wall));
 
-	float scaleFactorXWall = 30.f * scaleFactor.x / wall.getTexture()->getSize().x;
-	float scaleFactorYWall = 30.f * scaleFactor.y / wall.getTexture()->getSize().y;
-	wall.setScale(scaleFactorXWall, scaleFactorYWall);
-
-	float scaleFactorXGrass = 30.f * scaleFactor.x / grass.getTexture()->getSize().x;
-	float scaleFactorYGrass = 30.f * scaleFactor.y / grass.getTexture()->getSize().y;
-	grass.setScale(scaleFactorXGrass, scaleFactorYGrass);
-
-	float scaleFactorXFood = 30.f * scaleFactor.x / food.getTexture()->getSize().x;
-	float scaleFactorYFood = 30.f * scaleFactor.y / food.getTexture()->getSize().y;
-	food.setScale(scaleFactorXFood, scaleFactorYFood);
+	scaleSprite(wall, 30.f);
+	scaleSprite(grass, 30.f);
+	scaleSprite(food, 30.f);
 
 	for (int y = 0; y < gridHeight; y++) {
 		for (int x = 0; x < gridWidth; x++) {
@@ -67,12 +43,43 @@ void Play::init() {
 		}
 	}
 
+	snake = make_unique<Snake>(gridWidth / 2 - 1, gridHeight / 2 - 1, 3, gameContainer->assetManager, scaleFactor);
+
 	placeFood();
+}
+
+void Play::loadTextures() {
+	if (!gameContainer->assetManager->loadTexture("WALL-ENVIRONMENT")) {
+		cerr << "Failed to load texture: WALL-ENVIRONMENT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("GRASS-ENVIRONMENT")) {
+		cerr << "Failed to load texture: GRASS-ENVIRONMENT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("FOOD-OBJECT")) {
+		cerr << "Failed to load texture: FOOD-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("HEADR-OBJECT")) {
+		cerr << "Failed to load texture: HEADR-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+void Play::scaleSprite(sf::Sprite& sprite, float targetSize) {
+	float scaleFactorX = targetSize * scaleFactor.x / sprite.getTexture()->getSize().x;
+	float scaleFactorY = targetSize * scaleFactor.y / sprite.getTexture()->getSize().y;
+	sprite.setScale(scaleFactorX, scaleFactorY);
 }
 
 void Play::placeFood() {
 	int index = rand() % foodLocations.size();
 	sf::Vector2i pos = foodLocations[index];
+	foodLocations.erase(foodLocations.begin() + index);
 	food.setPosition(pos.x * 30 * scaleFactor.x, pos.y * 30 * scaleFactor.y);
 }
 
@@ -102,6 +109,9 @@ void Play::render() {
 		for (int x = 0; x < gridWidth; x++) {
 			gameContainer->window->draw(grid[y][x]);
 		}
+	}
+	for (const auto& segment : snake->getBody()) {
+		gameContainer->window->draw(segment.getSprite());
 	}
 	gameContainer->window->draw(food);
 	gameContainer->window->display();

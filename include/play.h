@@ -3,8 +3,12 @@
 #include "gameContainer.h"
 #include "state.h"
 #include "mainMenu.h"
+#include "snake.h"
 
 #include<vector>
+#include<deque>
+#include<SFML/Graphics.hpp>
+#include<SFML/Window.hpp>
 
 using namespace std;
 
@@ -15,12 +19,15 @@ private:
 	sf::Sprite wall;
 	sf::Sprite grass;
 	sf::Sprite food;
+	unique_ptr<Snake> snake;
 
 	vector<vector<sf::Sprite>> grid;
 	vector<sf::Vector2i> foodLocations;
 	int gridWidth, gridHeight;
 	bool paused;
 
+	void loadTextures();
+	void scaleSprite(sf::Sprite& sprite, float targetSize);
 	void placeFood();
 
 public:

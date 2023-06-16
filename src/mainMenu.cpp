@@ -119,6 +119,10 @@ void MainMenu::handleKeyEvent(sf::Event& event) {
 		keyClock.restart();
 		break;
 	case sf::Keyboard::Enter:
+		if (selectedMenuOption == 0) {
+			gameContainer->stateManager->popState();
+			gameContainer->stateManager->pushState(make_unique<Play>(gameContainer));
+		}
 		if (selectedMenuOption == 1) {
 			gameContainer->stateManager->pushState(make_unique<HighScore>(gameContainer));
 			keyClock.restart();
