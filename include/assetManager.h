@@ -19,8 +19,8 @@ public:
 	AssetManager();
 	~AssetManager();
 
-	void loadFont(string key);
-	void loadTexture(string key);
+	bool loadFont(string key);
+	bool loadTexture(string key);
 
 	sf::Font& getFont(string key);
 	sf::Texture& getTexture(string key);

@@ -14,7 +14,11 @@ void MainMenu::init() {
 	float scale = static_cast<float>(currentResolution) / baseResolution;
 	float spacing = gameContainer->window->getSize().y / 12.f;
 
-	gameContainer->assetManager->loadFont("MAIN-FONT");
+	if (!gameContainer->assetManager->loadFont("MAIN-FONT")) {
+		cerr << "Failed to load texture: MAIN-FONT" << endl;
+		gameContainer->window->close();
+		return;
+	}
 
 	gameTitle = *initText("Snake Game", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 16.f, static_cast<unsigned int>(108 * scale));
 	play = *initText("Play", gameContainer->window->getSize().x / 2.f, gameContainer->window->getSize().y / 2.f - spacing, static_cast<unsigned int>(55 * scale));

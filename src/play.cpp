@@ -11,11 +11,27 @@ Play::~Play() {
 }
 
 void Play::init() {
-	gameContainer->assetManager->loadTexture("WALL-ENVIRONMENT");
-	gameContainer->assetManager->loadTexture("GRASS-ENVIRONMENT");
+	if (!gameContainer->assetManager->loadTexture("WALL-ENVIRONMENT")) {
+		cerr << "Failed to load texture: WALL-ENVIRONMENT" << endl;
+		gameContainer->window->close();
+		return;
+	}
+
+	if (!gameContainer->assetManager->loadTexture("GRASS-ENVIRONMENT")) {
+		cerr << "Failed to load texture: GRASS-ENVIRONMENT" << endl;
+		gameContainer->window->close();
+		return;
+	}
+
+	if (!gameContainer->assetManager->loadTexture("FOOD-OBJECT")) {
+		cerr << "Failed to load texture: FOOD-OBJECT" << endl;
+		gameContainer->window->close();
+		return;
+	}
 
 	wall.setTexture(gameContainer->assetManager->getTexture("WALL-ENVIRONMENT"));
 	grass.setTexture(gameContainer->assetManager->getTexture("GRASS-ENVIRONMENT"));
+	food.setTexture(gameContainer->assetManager->getTexture("FOOD-OBJECT"));
 	grid.resize(gridHeight, vector<sf::Sprite>(gridWidth, wall));
 
 	float scaleFactorXWall = 30.f * scaleFactor.x / wall.getTexture()->getSize().x;
@@ -26,6 +42,10 @@ void Play::init() {
 	float scaleFactorYGrass = 30.f * scaleFactor.y / grass.getTexture()->getSize().y;
 	grass.setScale(scaleFactorXGrass, scaleFactorYGrass);
 
+	float scaleFactorXFood = 30.f * scaleFactor.x / food.getTexture()->getSize().x;
+	float scaleFactorYFood = 30.f * scaleFactor.y / food.getTexture()->getSize().y;
+	food.setScale(scaleFactorXFood, scaleFactorYFood);
+
 	for (int y = 0; y < gridHeight; y++) {
 		for (int x = 0; x < gridWidth; x++) {
 			sf::Sprite& sprite = grid[y][x];
@@ -35,6 +55,7 @@ void Play::init() {
 			}
 			else {
 				sprite = grass;
+				foodLocations.push_back(sf::Vector2i(x, y));
 				if ((x + y) % 2 == 0) {
 					sprite.setColor(sf::Color::White);
 				}
@@ -45,6 +66,14 @@ void Play::init() {
 			sprite.setPosition(x * 30 * scaleFactor.x, y * 30 * scaleFactor.y);
 		}
 	}
+
+	placeFood();
+}
+
+void Play::placeFood() {
+	int index = rand() % foodLocations.size();
+	sf::Vector2i pos = foodLocations[index];
+	food.setPosition(pos.x * 30 * scaleFactor.x, pos.y * 30 * scaleFactor.y);
 }
 
 void Play::handleInput() {
@@ -74,6 +103,7 @@ void Play::render() {
 			gameContainer->window->draw(grid[y][x]);
 		}
 	}
+	gameContainer->window->draw(food);
 	gameContainer->window->display();
 }
 
