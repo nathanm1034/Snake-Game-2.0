@@ -62,7 +62,7 @@ public:
 	Snake(int startX, int startY, int initialLength, shared_ptr<AssetManager>& assetManager, sf::Vector2f scaleFactor);
 	~Snake();
 
-	void init();
+	void setSegmentTexture(int index);
 	void move();
 	void setDirection(Direction dir);
 	const deque<SnakeSegment>& getBody() const;

@@ -48,8 +48,121 @@ Snake::~Snake() {
 
 }
 
-void Snake::init() {
-	
+void Snake::setSegmentTexture(int index) {
+	if (index == 1) {
+		switch (body[index].getTextureDirection()) {
+		case SnakeSegment::TextureDirection::HORIZONTAL:
+			switch (direction) {
+			case Direction::DOWN:
+				switch (previousDirection) {
+				case Direction::NONE:
+				case Direction::RIGHT:
+					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
+				}
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::VERTICAL:
+			switch (direction) {
+			case Direction::RIGHT:
+				switch (previousDirection) {
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+				}
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::RIGHTUP:
+			switch (previousDirection) {
+			case Direction::RIGHT:
+				switch (direction) {
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
+				case Direction::RIGHT:
+					body[index].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
+					break;
+				}
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::LEFTUP:
+			break;
+		case SnakeSegment::TextureDirection::RIGHTDOWN:
+			break;
+		case SnakeSegment::TextureDirection::LEFTDOWN:
+			switch (previousDirection) {
+			case Direction::DOWN:
+				switch (direction) {
+				case Direction::RIGHT:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
+					break;
+				}
+				break;
+			}
+			break;
+		}
+	}
+
+	else if (index == static_cast<int>(body.size()) - 1) {
+		switch (body[index].getTextureDirection()) {
+		case SnakeSegment::TextureDirection::RIGHT:
+			switch (body[index - 1].getTextureDirection()) {
+			case SnakeSegment::TextureDirection::LEFTDOWN:
+				body[index].setTexture(assetManager->getTexture("TAIL-D-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::DOWN);
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::LEFT:
+			break;
+		case SnakeSegment::TextureDirection::UP:
+			break;
+		case SnakeSegment::TextureDirection::DOWN:
+			switch (body[index - 1].getTextureDirection()) {
+			case SnakeSegment::TextureDirection::RIGHTUP:
+				body[index].setTexture(assetManager->getTexture("TAIL-R-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHT);
+				break;
+			}
+			break;
+		}
+	}
+
+	else {
+		switch (body[index - 1].getTextureDirection()) {
+		case SnakeSegment::TextureDirection::HORIZONTAL:
+			body[index].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
+			body[index].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
+			break;
+		case SnakeSegment::TextureDirection::VERTICAL:
+			body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
+			body[index].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
+			break;
+		case SnakeSegment::TextureDirection::RIGHTUP:
+			body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+			body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+			break;
+		case SnakeSegment::TextureDirection::LEFTUP:
+			break;
+		case SnakeSegment::TextureDirection::RIGHTDOWN:
+			break;
+		case SnakeSegment::TextureDirection::LEFTDOWN:
+			body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+			body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+			break;
+		}
+	}
 }
 
 void Snake::move() {
@@ -78,92 +191,11 @@ void Snake::move() {
 
 	if (direction == Direction::NONE) return;
 
-	if (previousDirection == Direction::NONE) {
-		cout << "none" << endl;
-	}
-
 	for (int i = static_cast<int>(body.size()) - 1; i > 0; i--) {
-		if (i == 1) {
-			if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::HORIZONTAL && direction != Direction::RIGHT && direction != Direction::LEFT) {
-				if (direction == Direction::DOWN && (previousDirection == Direction::RIGHT || previousDirection == Direction::NONE)) {
-					body[i].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
-				}
-			}
-			else if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::VERTICAL && direction != Direction::UP && direction != Direction::DOWN) {
-				if (direction == Direction::RIGHT && previousDirection == Direction::DOWN) {
-					body[i].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
-				}
-			}
-			else if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::LEFTDOWN && previousDirection == Direction::DOWN) {
-				if (direction == Direction::RIGHT) {
-					body[i].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
-				}
-				else {
-					body[i].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
-				}
-			}
-			else if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::RIGHTUP && previousDirection == Direction::RIGHT) {
-				if (direction == Direction::DOWN) {
-					body[i].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
-				}
-				else {
-					body[i].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
-				}
-			}
-		}
-		else if (i == static_cast<int>(body.size()) - 1) {
-			if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::RIGHT) {
-				if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::LEFTDOWN) {
-					body[i].setTexture(assetManager->getTexture("TAIL-D-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::DOWN);
-				}
-			}
-			if (body[i].getTextureDirection() == SnakeSegment::TextureDirection::DOWN) {
-				if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::RIGHTUP) {
-					body[i].setTexture(assetManager->getTexture("TAIL-R-OBJECT"));
-					body[i].setTextureDirection(SnakeSegment::TextureDirection::RIGHT);
-				}
-			}
-		}
-		else {
-			if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::HORIZONTAL) {
-				body[i].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
-				body[i].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
-			}
-			else if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::VERTICAL) {
-				body[i].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
-				body[i].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
-			}
-			else if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::RIGHTUP) {
-				body[i].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
-				body[i].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
-			}
-			else if (body[i - 1].getTextureDirection() == SnakeSegment::TextureDirection::LEFTDOWN) {
-				body[i].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
-				body[i].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
-			}
-		}
+		setSegmentTexture(i);
 		body[i].setPosition(body[i - 1].getPosition().x, body[i - 1].getPosition().y);
 	}
 	body.front().setPosition(headPos.x, headPos.y);
-
-	/*for (auto& segment : body) {
-		if (segment.getTextureDirection() == SnakeSegment::TextureDirection::RIGHT) {
-			cout << "right" << endl;
-		}
-		else if (segment.getTextureDirection() == SnakeSegment::TextureDirection::HORIZONTAL) {
-			cout << "horizontal" << endl;
-		}
-		else if (segment.getTextureDirection() == SnakeSegment::TextureDirection::DOWN) {
-			cout << "down" << endl;
-		}
-	}*/
 
 	previousDirection = direction;
 }
