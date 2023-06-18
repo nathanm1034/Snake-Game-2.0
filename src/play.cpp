@@ -1,7 +1,7 @@
 #include "../include/play.h"
 
 Play::Play(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), paused(false), tempCounter(0), tempMoved(false) {
+	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), paused(false) {
 	scaleFactor.x = gameContainer->window->getSize().x / 960.f;
 	scaleFactor.y = gameContainer->window->getSize().y / 540.f;
 }
@@ -73,6 +73,11 @@ void Play::loadTextures() {
 		exit(EXIT_FAILURE);
 	}
 
+	if (!gameContainer->assetManager->loadTexture("HEAD-U-OBJECT")) {
+		cerr << "Failed to load texture: HEAD-U-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
 	if (!gameContainer->assetManager->loadTexture("HEAD-D-OBJECT")) {
 		cerr << "Failed to load texture: HEAD-D-OBJECT" << endl;
 		exit(EXIT_FAILURE);
@@ -93,6 +98,16 @@ void Play::loadTextures() {
 		exit(EXIT_FAILURE);
 	}
 
+	if (!gameContainer->assetManager->loadTexture("BODY-RD-OBJECT")) {
+		cerr << "Failed to load texture: BODY-RD-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("BODY-LU-OBJECT")) {
+		cerr << "Failed to load texture: BODY-LU-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
 	if (!gameContainer->assetManager->loadTexture("BODY-LD-OBJECT")) {
 		cerr << "Failed to load texture: BODY-LD-OBJECT" << endl;
 		exit(EXIT_FAILURE);
@@ -100,6 +115,11 @@ void Play::loadTextures() {
 
 	if (!gameContainer->assetManager->loadTexture("TAIL-R-OBJECT")) {
 		cerr << "Failed to load texture: TAIL-R-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("TAIL-U-OBJECT")) {
+		cerr << "Failed to load texture: TAIL-U-OBJECT" << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -142,11 +162,12 @@ void Play::handleInput() {
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
 				snake->setDirection(Snake::Direction::RIGHT);
-				tempCounter++;
+			}
+			else if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
+				snake->setDirection(Snake::Direction::UP);
 			}
 			else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
 				snake->setDirection(Snake::Direction::DOWN);
-				tempCounter++;
 			}
 		}
 	}
