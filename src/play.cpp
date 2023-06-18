@@ -1,7 +1,7 @@
 #include "../include/play.h"
 
 Play::Play(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), paused(false) {
+	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), paused(false), tempCounter(0), tempMoved(false) {
 	scaleFactor.x = gameContainer->window->getSize().x / 960.f;
 	scaleFactor.y = gameContainer->window->getSize().y / 540.f;
 }
@@ -43,7 +43,11 @@ void Play::init() {
 		}
 	}
 
-	snake = make_unique<Snake>(gridWidth / 2 - 1, gridHeight / 2 - 1, 3, gameContainer->assetManager, scaleFactor);
+	snake = make_unique<Snake>(gridWidth / 2 - 1, gridHeight / 2 - 1, 5, gameContainer->assetManager, scaleFactor);
+	for (const auto& segment : snake->getBody()) {
+		sf::Vector2i position(segment.getPosition());
+		removeFoodLocation(position);
+	}
 
 	placeFood();
 }
@@ -64,8 +68,43 @@ void Play::loadTextures() {
 		exit(EXIT_FAILURE);
 	}
 
-	if (!gameContainer->assetManager->loadTexture("HEADR-OBJECT")) {
-		cerr << "Failed to load texture: HEADR-OBJECT" << endl;
+	if (!gameContainer->assetManager->loadTexture("HEAD-R-OBJECT")) {
+		cerr << "Failed to load texture: HEAD-R-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("HEAD-D-OBJECT")) {
+		cerr << "Failed to load texture: HEAD-D-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("BODY-H-OBJECT")) {
+		cerr << "Failed to load texture: BODY-H-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("BODY-V-OBJECT")) {
+		cerr << "Failed to load texture: BODY-V-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("BODY-RU-OBJECT")) {
+		cerr << "Failed to load texture: BODY-RU-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("BODY-LD-OBJECT")) {
+		cerr << "Failed to load texture: BODY-LD-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("TAIL-R-OBJECT")) {
+		cerr << "Failed to load texture: TAIL-R-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("TAIL-D-OBJECT")) {
+		cerr << "Failed to load texture: TAIL-D-OBJECT" << endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -79,8 +118,12 @@ void Play::scaleSprite(sf::Sprite& sprite, float targetSize) {
 void Play::placeFood() {
 	int index = rand() % foodLocations.size();
 	sf::Vector2i pos = foodLocations[index];
-	foodLocations.erase(foodLocations.begin() + index);
+	removeFoodLocation(pos);
 	food.setPosition(pos.x * 30 * scaleFactor.x, pos.y * 30 * scaleFactor.y);
+}
+
+void Play::removeFoodLocation(sf::Vector2i position) {
+	foodLocations.erase(remove(foodLocations.begin(), foodLocations.end(), position), foodLocations.end());
 }
 
 void Play::handleInput() {
@@ -92,15 +135,25 @@ void Play::handleInput() {
 		if (event.type == sf::Event::Closed) {
 			gameContainer->window->close();
 		}
-		else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-			gameContainer->stateManager->popState();
-			gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
+		else if (event.type == sf::Event::KeyPressed) {
+			if (event.key.code == sf::Keyboard::Escape) {
+				gameContainer->stateManager->popState();
+				gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
+			}
+			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
+				snake->setDirection(Snake::Direction::RIGHT);
+				tempCounter++;
+			}
+			else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
+				snake->setDirection(Snake::Direction::DOWN);
+				tempCounter++;
+			}
 		}
 	}
 }
 
 void Play::update() {
-
+	snake->move();
 }
 
 void Play::render() {

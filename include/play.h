@@ -29,6 +29,10 @@ private:
 	void loadTextures();
 	void scaleSprite(sf::Sprite& sprite, float targetSize);
 	void placeFood();
+	void removeFoodLocation(sf::Vector2i position);
+
+	int tempCounter;
+	bool tempMoved;
 
 public:
 	Play(shared_ptr<GameContainer>& gameContainer);

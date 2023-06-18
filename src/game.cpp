@@ -15,11 +15,22 @@ Game::~Game() {
 }
 
 void Game::open() {
+    sf::Clock clock;
+    const sf::Time timePerFrame = sf::milliseconds(500);
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
+
     gameContainer->window->setFramerateLimit(60);
+
     while (gameContainer->window->isOpen()) {
+        sf::Time elapsedTime = clock.restart();
+        timeSinceLastUpdate += elapsedTime;
+        
         gameContainer->stateManager->changeState();
-        gameContainer->stateManager->getCurrentState()->handleInput();
-        gameContainer->stateManager->getCurrentState()->update();
+        while (timeSinceLastUpdate > timePerFrame) {
+            timeSinceLastUpdate -= timePerFrame;
+            gameContainer->stateManager->getCurrentState()->handleInput();
+            gameContainer->stateManager->getCurrentState()->update();
+        }
         gameContainer->stateManager->getCurrentState()->render();
     }
 }
