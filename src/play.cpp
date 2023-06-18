@@ -73,6 +73,11 @@ void Play::loadTextures() {
 		exit(EXIT_FAILURE);
 	}
 
+	if (!gameContainer->assetManager->loadTexture("HEAD-L-OBJECT")) {
+		cerr << "Failed to load texture: HEAD-L-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
 	if (!gameContainer->assetManager->loadTexture("HEAD-U-OBJECT")) {
 		cerr << "Failed to load texture: HEAD-U-OBJECT" << endl;
 		exit(EXIT_FAILURE);
@@ -115,6 +120,11 @@ void Play::loadTextures() {
 
 	if (!gameContainer->assetManager->loadTexture("TAIL-R-OBJECT")) {
 		cerr << "Failed to load texture: TAIL-R-OBJECT" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!gameContainer->assetManager->loadTexture("TAIL-L-OBJECT")) {
+		cerr << "Failed to load texture: TAIL-L-OBJECT" << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -162,6 +172,9 @@ void Play::handleInput() {
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
 				snake->setDirection(Snake::Direction::RIGHT);
+			}
+			else if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
+				snake->setDirection(Snake::Direction::LEFT);
 			}
 			else if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
 				snake->setDirection(Snake::Direction::UP);

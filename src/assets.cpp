@@ -6,6 +6,7 @@ unordered_map<string, string> assets = {
 	{"GRASS-ENVIRONMENT", "assets/environment/grass.png"},
 	{"FOOD-OBJECT", "assets/object/apple.png"},
 	{"HEAD-R-OBJECT", "assets/object/head_right.png"},
+	{"HEAD-L-OBJECT", "assets/object/head_left.png"},
 	{"HEAD-U-OBJECT", "assets/object/head_up.png"},
 	{"HEAD-D-OBJECT", "assets/object/head_down.png"},
 	{"BODY-H-OBJECT", "assets/object/body_horizontal.png"},
@@ -15,6 +16,7 @@ unordered_map<string, string> assets = {
 	{"BODY-LU-OBJECT", "assets/object/body_topleft.png"},
 	{"BODY-LD-OBJECT", "assets/object/body_bottomleft.png"},
 	{"TAIL-R-OBJECT", "assets/object/tail_right.png"},
+	{"TAIL-L-OBJECT", "assets/object/tail_left.png"},
 	{"TAIL-U-OBJECT", "assets/object/tail_up.png"},
 	{"TAIL-D-OBJECT", "assets/object/tail_down.png"}
 };

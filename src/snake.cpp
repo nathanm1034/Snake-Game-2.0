@@ -60,6 +60,10 @@ void Snake::setSegmentTexture(int index) {
 					body[index].setTexture(assetManager->getTexture("BODY-LU-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTUP);
 					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
 				}
 				break;
 			case Direction::DOWN:
@@ -68,6 +72,10 @@ void Snake::setSegmentTexture(int index) {
 				case Direction::RIGHT:
 					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-RD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTDOWN);
 					break;
 				}
 				break;
@@ -84,6 +92,18 @@ void Snake::setSegmentTexture(int index) {
 				case Direction::DOWN:
 					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				}
+				break;
+			case Direction::LEFT:
+				switch (previousDirection) {
+				case Direction::UP:
+					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-LU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTUP);
 					break;
 				}
 				break;
@@ -107,21 +127,58 @@ void Snake::setSegmentTexture(int index) {
 					break;
 				}
 				break;
-			}
-			break;
-		case SnakeSegment::TextureDirection::LEFTUP:
-			switch (previousDirection) {
 			case Direction::UP:
 				switch (direction) {
 				case Direction::RIGHT:
 					body[index].setTexture(assetManager->getTexture("BODY-RD-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTDOWN);
 					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
 				case Direction::UP:
 					body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
 					break;
 				}
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::LEFTUP:
+			switch (previousDirection) {
+			case Direction::LEFT:
+				switch (direction) {
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
+					break;
+				case Direction::UP:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-RD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTDOWN);
+					break;
+				}
+				break;
+			case Direction::UP:
+				switch (direction) {
+				case Direction::RIGHT:
+					body[index].setTexture(assetManager->getTexture("BODY-RD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTDOWN);
+					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-LD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTDOWN);
+					break;
+				case Direction::UP:
+					body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
+					break;
+				}
+				break;
 			}
 			break;
 		case SnakeSegment::TextureDirection::RIGHTDOWN:
@@ -142,15 +199,51 @@ void Snake::setSegmentTexture(int index) {
 					break;
 				}
 				break;
-			}
-			break;
-		case SnakeSegment::TextureDirection::LEFTDOWN:
-			switch (previousDirection) {
 			case Direction::DOWN:
 				switch (direction) {
 				case Direction::RIGHT:
 					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
 					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-LU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTUP);
+					break;
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::VERTICAL);
+					break;
+				}
+				break;
+			}
+			break;
+		case SnakeSegment::TextureDirection::LEFTDOWN:
+			switch (previousDirection) {
+			case Direction::LEFT:
+				switch (direction) {
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-H-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::HORIZONTAL);
+					break;
+				case Direction::UP:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				case Direction::DOWN:
+					body[index].setTexture(assetManager->getTexture("BODY-RD-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTDOWN);
+					break;
+				}
+				break;
+			case Direction::DOWN:
+				switch (direction) {
+				case Direction::RIGHT:
+					body[index].setTexture(assetManager->getTexture("BODY-RU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHTUP);
+					break;
+				case Direction::LEFT:
+					body[index].setTexture(assetManager->getTexture("BODY-LU-OBJECT"));
+					body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFTUP);
 					break;
 				case Direction::DOWN:
 					body[index].setTexture(assetManager->getTexture("BODY-V-OBJECT"));
@@ -178,12 +271,26 @@ void Snake::setSegmentTexture(int index) {
 			}
 			break;
 		case SnakeSegment::TextureDirection::LEFT:
+			switch (body[index - 1].getTextureDirection()) {
+			case SnakeSegment::TextureDirection::RIGHTUP:
+				body[index].setTexture(assetManager->getTexture("TAIL-U-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::UP);
+				break;
+			case SnakeSegment::TextureDirection::RIGHTDOWN:
+				body[index].setTexture(assetManager->getTexture("TAIL-D-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::DOWN);
+				break;
+			}
 			break;
 		case SnakeSegment::TextureDirection::UP:
 			switch (body[index - 1].getTextureDirection()) {
-			case SnakeSegment::TextureDirection::RIGHTDOWN:
+			case SnakeSegment::TextureDirection::RIGHTDOWN :
 				body[index].setTexture(assetManager->getTexture("TAIL-R-OBJECT"));
 				body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHT);
+				break;
+			case SnakeSegment::TextureDirection::LEFTDOWN:
+				body[index].setTexture(assetManager->getTexture("TAIL-L-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFT);
 				break;
 			}
 			break;
@@ -192,6 +299,10 @@ void Snake::setSegmentTexture(int index) {
 			case SnakeSegment::TextureDirection::RIGHTUP:
 				body[index].setTexture(assetManager->getTexture("TAIL-R-OBJECT"));
 				body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHT);
+				break;
+			case SnakeSegment::TextureDirection::LEFTUP:
+				body[index].setTexture(assetManager->getTexture("TAIL-L-OBJECT"));
+				body[index].setTextureDirection(SnakeSegment::TextureDirection::LEFT);
 				break;
 			}
 			break;
@@ -239,8 +350,13 @@ void Snake::move() {
 		}
 		headPos.x++;
 		break;
-	//case Direction::LEFT:
-	//	break;
+	case Direction::LEFT:
+		if (direction != previousDirection) {
+			body.front().setTexture(assetManager->getTexture("HEAD-L-OBJECT"));
+			body.front().setTextureDirection(SnakeSegment::TextureDirection::LEFT);
+		}
+		headPos.x--;
+		break;
 	case Direction::UP:
 		if (direction != previousDirection) {
 			body.front().setTexture(assetManager->getTexture("HEAD-U-OBJECT"));
