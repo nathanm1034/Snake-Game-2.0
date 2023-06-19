@@ -147,9 +147,9 @@ void Play::scaleSprite(sf::Sprite& sprite, float targetSize) {
 
 void Play::placeFood() {
 	int index = rand() % foodLocations.size();
-	sf::Vector2i pos = foodLocations[index];
-	removeFoodLocation(pos);
-	food.setPosition(pos.x * 30 * scaleFactor.x, pos.y * 30 * scaleFactor.y);
+	foodPosition = foodLocations[index];
+	removeFoodLocation(foodPosition);
+	food.setPosition(foodPosition.x * 30 * scaleFactor.x, foodPosition.y * 30 * scaleFactor.y);
 }
 
 void Play::addFoodLocation(sf::Vector2i position) {
@@ -175,19 +175,15 @@ void Play::handleInput() {
 				gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
-				//snake->setDirection(Snake::Direction::RIGHT);
 				directionQueue.push(Snake::Direction::RIGHT);
 			}
 			else if ((event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) && snake->getDirection() != Snake::Direction::NONE) {
-				//snake->setDirection(Snake::Direction::LEFT);
 				directionQueue.push(Snake::Direction::LEFT);
 			}
 			else if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
-				//snake->setDirection(Snake::Direction::UP);
 				directionQueue.push(Snake::Direction::UP);
 			}
 			else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
-				//snake->setDirection(Snake::Direction::DOWN);
 				directionQueue.push(Snake::Direction::DOWN);
 			}
 		}
@@ -211,6 +207,12 @@ void Play::update() {
 		addFoodLocation(snake->getBody().back().getPosition());
 		snake->move();
 		removeFoodLocation(snake->getBody().front().getPosition());
+	}
+
+	sf::Vector2i head(snake->getBody().front().getPosition());
+	if (head == foodPosition) {
+		placeFood();
+		//grow
 	}
 }
 

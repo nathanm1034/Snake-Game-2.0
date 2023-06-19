@@ -16,7 +16,7 @@ Game::~Game() {
 
 void Game::open() {
     sf::Clock clock;
-    const sf::Time timePerFrame = sf::milliseconds(150);
+    const sf::Time timePerFrame = sf::milliseconds(135);
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
     gameContainer->window->setFramerateLimit(60);

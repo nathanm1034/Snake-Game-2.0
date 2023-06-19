@@ -24,6 +24,7 @@ private:
 
 	vector<vector<sf::Sprite>> grid;
 	vector<sf::Vector2i> foodLocations;
+	sf::Vector2i foodPosition;
 	queue<Snake::Direction> directionQueue;
 	int gridWidth, gridHeight;
 	bool paused;
