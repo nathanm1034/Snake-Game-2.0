@@ -66,4 +66,5 @@ public:
 	void move();
 	void setDirection(Direction dir);
 	const deque<SnakeSegment>& getBody() const;
+	Direction getDirection() { return direction; }
 };

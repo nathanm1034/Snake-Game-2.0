@@ -284,7 +284,7 @@ void Snake::setSegmentTexture(int index) {
 			break;
 		case SnakeSegment::TextureDirection::UP:
 			switch (body[index - 1].getTextureDirection()) {
-			case SnakeSegment::TextureDirection::RIGHTDOWN :
+			case SnakeSegment::TextureDirection::RIGHTDOWN:
 				body[index].setTexture(assetManager->getTexture("TAIL-R-OBJECT"));
 				body[index].setTextureDirection(SnakeSegment::TextureDirection::RIGHT);
 				break;
@@ -372,8 +372,6 @@ void Snake::move() {
 		headPos.y++;
 		break;
 	}
-
-	if (direction == Direction::NONE) return;
 
 	for (int i = static_cast<int>(body.size()) - 1; i > 0; i--) {
 		setSegmentTexture(i);

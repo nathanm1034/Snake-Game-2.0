@@ -43,7 +43,7 @@ void Play::init() {
 		}
 	}
 
-	snake = make_unique<Snake>(gridWidth / 2 - 1, gridHeight / 2 - 1, 5, gameContainer->assetManager, scaleFactor);
+	snake = make_unique<Snake>(gridWidth / 2 - 1, gridHeight / 2 - 1, 3, gameContainer->assetManager, scaleFactor);
 	for (const auto& segment : snake->getBody()) {
 		sf::Vector2i position(segment.getPosition());
 		removeFoodLocation(position);
@@ -152,6 +152,10 @@ void Play::placeFood() {
 	food.setPosition(pos.x * 30 * scaleFactor.x, pos.y * 30 * scaleFactor.y);
 }
 
+void Play::addFoodLocation(sf::Vector2i position) {
+	foodLocations.push_back(position);
+}
+
 void Play::removeFoodLocation(sf::Vector2i position) {
 	foodLocations.erase(remove(foodLocations.begin(), foodLocations.end(), position), foodLocations.end());
 }
@@ -171,23 +175,43 @@ void Play::handleInput() {
 				gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
-				snake->setDirection(Snake::Direction::RIGHT);
+				//snake->setDirection(Snake::Direction::RIGHT);
+				directionQueue.push(Snake::Direction::RIGHT);
 			}
-			else if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
-				snake->setDirection(Snake::Direction::LEFT);
+			else if ((event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) && snake->getDirection() != Snake::Direction::NONE) {
+				//snake->setDirection(Snake::Direction::LEFT);
+				directionQueue.push(Snake::Direction::LEFT);
 			}
 			else if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
-				snake->setDirection(Snake::Direction::UP);
+				//snake->setDirection(Snake::Direction::UP);
+				directionQueue.push(Snake::Direction::UP);
 			}
 			else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
-				snake->setDirection(Snake::Direction::DOWN);
+				//snake->setDirection(Snake::Direction::DOWN);
+				directionQueue.push(Snake::Direction::DOWN);
 			}
 		}
 	}
 }
 
 void Play::update() {
-	snake->move();
+	if (!directionQueue.empty()) {
+		Snake::Direction newDirection = directionQueue.front();
+		directionQueue.pop();
+
+		if ((newDirection == Snake::Direction::LEFT && snake->getDirection() != Snake::Direction::RIGHT) ||
+			(newDirection == Snake::Direction::RIGHT && snake->getDirection() != Snake::Direction::LEFT) ||
+			(newDirection == Snake::Direction::UP && snake->getDirection() != Snake::Direction::DOWN) ||
+			(newDirection == Snake::Direction::DOWN && snake->getDirection() != Snake::Direction::UP)) {
+			snake->setDirection(newDirection);
+		}
+	}
+
+	if (snake->getDirection() != Snake::Direction::NONE) {
+		addFoodLocation(snake->getBody().back().getPosition());
+		snake->move();
+		removeFoodLocation(snake->getBody().front().getPosition());
+	}
 }
 
 void Play::render() {
@@ -197,10 +221,10 @@ void Play::render() {
 			gameContainer->window->draw(grid[y][x]);
 		}
 	}
+	gameContainer->window->draw(food);
 	for (const auto& segment : snake->getBody()) {
 		gameContainer->window->draw(segment.getSprite());
 	}
-	gameContainer->window->draw(food);
 	gameContainer->window->display();
 }
 

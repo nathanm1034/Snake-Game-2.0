@@ -6,6 +6,7 @@
 #include "snake.h"
 
 #include<vector>
+#include<queue>
 #include<deque>
 #include<SFML/Graphics.hpp>
 #include<SFML/Window.hpp>
@@ -23,12 +24,14 @@ private:
 
 	vector<vector<sf::Sprite>> grid;
 	vector<sf::Vector2i> foodLocations;
+	queue<Snake::Direction> directionQueue;
 	int gridWidth, gridHeight;
 	bool paused;
 
 	void loadTextures();
 	void scaleSprite(sf::Sprite& sprite, float targetSize);
 	void placeFood();
+	void addFoodLocation(sf::Vector2i position);
 	void removeFoodLocation(sf::Vector2i position);
 
 public:
