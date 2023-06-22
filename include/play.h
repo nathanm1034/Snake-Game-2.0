@@ -30,6 +30,8 @@ private:
 	sf::Vector2i foodPosition;
 
 	queue<Snake::Direction> directionQueue;
+	bool gameOver;
+	bool gameOverInitial;
 	bool paused;
 
 	void loadTextures();
@@ -52,29 +54,48 @@ public:
 	string getType() override { return "Play"; }
 };
 
-class Paused : public State {
-private:
+class Popup : public State {
+protected:
 	shared_ptr<GameContainer> gameContainer;
 	sf::ConvexShape popupBody;
-	sf::Text pausedTitle;
-	sf::Text resume;
-	sf::Text restart;
-	sf::Text mainMenu;
-
-	vector<shared_ptr<sf::Text>> pauseOptions;
+	sf::Text title;
+	vector<shared_ptr<sf::Text>> options;
 	bool usingMouse;
-	int selectedPauseOptions;
+	int selectedOption;
 
-	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
+	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize, sf::Color fillColor = sf::Color::White);
 	void handleMouseEvent(sf::Event& event);
 	void handleKeyEvent(sf::Event& event);
 
 public:
-	Paused(shared_ptr<GameContainer>& gameContainer);
-	~Paused();
+	Popup(shared_ptr<GameContainer>& gameContainer);
+	virtual ~Popup() {};
 
-	void init() override;
 	void handleInput() override;
 	void update() override;
 	void render() override;
+};
+
+class Paused : public Popup {
+private:
+	sf::Text resume;
+	sf::Text restart;
+	sf::Text mainMenu;
+
+public:
+	Paused(shared_ptr<GameContainer>& gameContainer);
+
+	void init() override;
+};
+
+class GameOver : public Popup {
+private:
+	sf::Text view;
+	sf::Text restart;
+	sf::Text mainMenu;
+
+public:
+	GameOver(shared_ptr<GameContainer>& gameContainer);
+
+	void init() override;
 };

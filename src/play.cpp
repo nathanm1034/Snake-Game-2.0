@@ -1,7 +1,7 @@
 #include "../include/play.h"
 
 Play::Play(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), paused(false) {
+	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), gameOver(false), gameOverInitial(false), paused(false) {
 	scaleFactor.x = gameContainer->window->getSize().x / 960.f;
 	scaleFactor.y = gameContainer->window->getSize().y / 540.f;
 }
@@ -162,6 +162,12 @@ void Play::removeFoodLocation(sf::Vector2i position) {
 }
 
 void Play::handleInput() {
+	if (gameOver && !gameOverInitial) {
+		gameContainer->stateManager->pushState(make_unique<GameOver>(gameContainer));
+		gameOverInitial = true;
+		return;
+	}
+
 	if (paused) return;
 
 	sf::Event event;
@@ -172,7 +178,12 @@ void Play::handleInput() {
 		}
 		else if (event.type == sf::Event::KeyPressed) {
 			if (event.key.code == sf::Keyboard::Escape) {
-				gameContainer->stateManager->pushState(make_unique<Paused>(gameContainer));
+				if (gameOver) {
+					gameContainer->stateManager->pushState(make_unique<GameOver>(gameContainer));
+				}
+				else {
+					gameContainer->stateManager->pushState(make_unique<Paused>(gameContainer));
+				}
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
 				directionQueue.push(Snake::Direction::RIGHT);
@@ -191,7 +202,7 @@ void Play::handleInput() {
 }
 
 void Play::update() {
-	if (paused) return;
+	if (paused || gameOver) return;
 
 	if (!directionQueue.empty()) {
 		Snake::Direction newDirection = directionQueue.front();
@@ -212,6 +223,12 @@ void Play::update() {
 	}
 
 	sf::Vector2i head(snake->getBody().front().getPosition());
+
+	if (head.x == 0 || head.y == 0 || head.x == gridWidth - 1 || head.y == gridHeight - 1) {
+		gameOver = true;
+		return;
+	}
+
 	if (head == foodPosition) {
 		placeFood();
 		//grow
@@ -241,49 +258,21 @@ void Play::resume() {
 }
 
 
-Paused::Paused(shared_ptr<GameContainer>& gameContainer) 
-	: gameContainer(gameContainer), selectedPauseOptions(-1), usingMouse(false) {
-}
+Popup::Popup(shared_ptr<GameContainer>& gameContainer) 
+	: gameContainer(gameContainer), selectedOption(-1), usingMouse(false) {}
 
-Paused::~Paused() {
-	
-}
-
-void Paused::init() {
-	const sf::Vector2f windowSize(gameContainer->window->getSize());
-	const sf::Vector2f baseResolution(1920.f, 1080.f);
-	const sf::Vector2f scaleFactor(windowSize.x / baseResolution.x, windowSize.y / baseResolution.y);
-	const float maxScaleFactor = max(scaleFactor.x, scaleFactor.y);
-	const float borderThickness = 18.f * maxScaleFactor;
-	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
-
-	const sf::Vector2f popupBodySize(windowSize / 2.f);
-	popupBody = thor::Shapes::roundedRect(popupBodySize, 120.f * maxScaleFactor, sf::Color(65, 105, 225), borderThickness, sf::Color::White);
-	popupBody.setOrigin(popupBodySize / 2.f);
-	popupBody.setPosition(windowSize / 2.f);
-
-	pausedTitle = *initText("Paused", windowSize.x / 2.f, titlePosY, static_cast<unsigned int>(80.f * scaleFactor.y));
-	resume = *initText("Resume", windowSize.x / 2.f, windowSize.y / 2.f - 5.f * borderThickness + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
-	restart = *initText("Restart Game", windowSize.x / 2.f, windowSize.y / 2.f + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
-	mainMenu = *initText("Main Menu", windowSize.x / 2.f, windowSize.y / 2.f + 5.f * borderThickness + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
-
-	pauseOptions.push_back(make_shared<sf::Text>(resume));
-	pauseOptions.push_back(make_shared<sf::Text>(restart));
-	pauseOptions.push_back(make_shared<sf::Text>(mainMenu));
-}
-
-shared_ptr<sf::Text> Paused::initText(const string& textString, float positionX, float positionY, unsigned int charSize) {
+shared_ptr<sf::Text> Popup::initText(const string& textString, float positionX, float positionY, unsigned int charSize, sf::Color fillColor) {
 	auto text = make_shared<sf::Text>();
 	text->setFont(gameContainer->assetManager->getFont("MAIN-FONT"));
 	text->setString(textString);
 	text->setCharacterSize(charSize);
-	text->setFillColor(sf::Color::White);
+	text->setFillColor(fillColor);
 	text->setOrigin(text->getLocalBounds().left + text->getLocalBounds().width / 2.f, text->getLocalBounds().top + text->getLocalBounds().height / 2.f);
 	text->setPosition(positionX, positionY);
 	return text;
 }
 
-void Paused::handleInput() {
+void Popup::handleInput() {
 	sf::Event event;
 
 	while (gameContainer->window->pollEvent(event)) {
@@ -299,24 +288,24 @@ void Paused::handleInput() {
 	}
 }
 
-void Paused::handleMouseEvent(sf::Event& event) {
+void Popup::handleMouseEvent(sf::Event& event) {
 	sf::Vector2f mousePosition = gameContainer->window->mapPixelToCoords(sf::Mouse::getPosition(*gameContainer->window));
 	bool hovering = false;
 
-	for (int i = 0; i < pauseOptions.size(); i++) {
-		if (pauseOptions[i]->getGlobalBounds().contains(mousePosition)) {
-			selectedPauseOptions = i;
+	for (int i = 0; i < options.size(); i++) {
+		if (options[i]->getGlobalBounds().contains(mousePosition)) {
+			selectedOption = i;
 			usingMouse = true;
 			hovering = true;
 
 			if (event.mouseButton.button == sf::Mouse::Left) {
-				if (selectedPauseOptions == 0) {
+				if (selectedOption == 0) {
 					gameContainer->stateManager->popState();
 				}
-				else if (selectedPauseOptions == 1) {
+				else if (selectedOption == 1) {
 					gameContainer->stateManager->pushState(make_unique<Play>(gameContainer), true);
 				}
-				else if (selectedPauseOptions == pauseOptions.size() - 1) {
+				else if (selectedOption == options.size() - 1) {
 					gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer), true);
 				}
 			}
@@ -326,40 +315,40 @@ void Paused::handleMouseEvent(sf::Event& event) {
 	}
 
 	if (!hovering && usingMouse) {
-		selectedPauseOptions = -1;
+		selectedOption = -1;
 	}
 }
 
-void Paused::handleKeyEvent(sf::Event& event) {
+void Popup::handleKeyEvent(sf::Event& event) {
 	switch (event.key.code) {
 	case sf::Keyboard::Up:
 	case sf::Keyboard::W:
 		usingMouse = false;
-		if (selectedPauseOptions > 0) {
-			selectedPauseOptions--;
+		if (selectedOption > 0) {
+			selectedOption--;
 		}
-		else if (selectedPauseOptions == -1 || selectedPauseOptions == 0) {
-			selectedPauseOptions = static_cast<int>(pauseOptions.size()) - 1;
+		else if (selectedOption == -1 || selectedOption == 0) {
+			selectedOption = static_cast<int>(options.size()) - 1;
 		}
 		break;
 	case sf::Keyboard::Down:
 	case sf::Keyboard::S:
 		usingMouse = false;
-		if (selectedPauseOptions < pauseOptions.size() - 1) {
-			selectedPauseOptions++;
+		if (selectedOption < options.size() - 1) {
+			selectedOption++;
 		}
-		else if (selectedPauseOptions == -1 || selectedPauseOptions == pauseOptions.size() - 1) {
-			selectedPauseOptions = 0;
+		else if (selectedOption == -1 || selectedOption == options.size() - 1) {
+			selectedOption = 0;
 		}
 		break;
 	case sf::Keyboard::Enter:
-		if (selectedPauseOptions == 0) {
+		if (selectedOption == 0) {
 			gameContainer->stateManager->popState();
 		}
-		else if (selectedPauseOptions == 1) {
+		else if (selectedOption == 1) {
 			gameContainer->stateManager->pushState(make_unique<Play>(gameContainer), true);
 		}
-		else if (selectedPauseOptions == pauseOptions.size() - 1) {
+		else if (selectedOption == options.size() - 1) {
 			gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer), true);
 		}
 		break;
@@ -370,22 +359,76 @@ void Paused::handleKeyEvent(sf::Event& event) {
 	}
 }
 
-void Paused::update() {
-	for (int i = 0; i < pauseOptions.size(); i++) {
-		if (i == selectedPauseOptions) {
-			pauseOptions[i]->setFillColor(sf::Color::Red);
+void Popup::update() {
+	for (int i = 0; i < options.size(); i++) {
+		if (i == selectedOption) {
+			options[i]->setFillColor(sf::Color::Red);
 		}
 		else {
-			pauseOptions[i]->setFillColor(sf::Color::White);
+			options[i]->setFillColor(sf::Color::White);
 		}
 	}
 }
 
-void Paused::render() {
+void Popup::render() {
 	gameContainer->window->draw(popupBody);
-	gameContainer->window->draw(pausedTitle);
-	for (auto& text : pauseOptions) {
+	gameContainer->window->draw(title);
+	for (auto& text : options) {
 		gameContainer->window->draw(*text);
 	}
 	gameContainer->window->display();
+}
+
+
+Paused::Paused(shared_ptr<GameContainer>& gameContainer) 
+	: Popup(gameContainer) {}
+
+void Paused::init() {
+	const sf::Vector2f windowSize(gameContainer->window->getSize());
+	const sf::Vector2f baseResolution(1920.f, 1080.f);
+	const sf::Vector2f scaleFactor(windowSize.x / baseResolution.x, windowSize.y / baseResolution.y);
+	const float maxScaleFactor = max(scaleFactor.x, scaleFactor.y);
+	const float borderThickness = 18.f * maxScaleFactor;
+	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
+
+	const sf::Vector2f popupBodySize(windowSize / 2.f);
+	popupBody = thor::Shapes::roundedRect(popupBodySize, 120.f * maxScaleFactor, sf::Color(65, 105, 225), borderThickness, sf::Color::White);
+	popupBody.setOrigin(popupBodySize / 2.f);
+	popupBody.setPosition(windowSize / 2.f);
+
+	title = *initText("Paused", windowSize.x / 2.f, titlePosY, static_cast<unsigned int>(80.f * scaleFactor.y));
+	resume = *initText("Resume", windowSize.x / 2.f, windowSize.y / 2.f - 5.f * borderThickness + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	restart = *initText("Restart Game", windowSize.x / 2.f, windowSize.y / 2.f + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	mainMenu = *initText("Main Menu", windowSize.x / 2.f, windowSize.y / 2.f + 5.f * borderThickness + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+
+	options.push_back(make_shared<sf::Text>(resume));
+	options.push_back(make_shared<sf::Text>(restart));
+	options.push_back(make_shared<sf::Text>(mainMenu));
+}
+
+
+GameOver::GameOver(shared_ptr<GameContainer>& gameContainer) 
+	: Popup(gameContainer) {}
+
+void  GameOver::init() {
+	const sf::Vector2f windowSize(gameContainer->window->getSize());
+	const sf::Vector2f baseResolution(1920.f, 1080.f);
+	const sf::Vector2f scaleFactor(windowSize.x / baseResolution.x, windowSize.y / baseResolution.y);
+	const float maxScaleFactor = max(scaleFactor.x, scaleFactor.y);
+	const float borderThickness = 18.f * maxScaleFactor;
+	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
+
+	const sf::Vector2f popupBodySize(windowSize / 2.f);
+	popupBody = thor::Shapes::roundedRect(popupBodySize, 120.f * maxScaleFactor, sf::Color(65, 105, 225), borderThickness, sf::Color::White);
+	popupBody.setOrigin(popupBodySize / 2.f);
+	popupBody.setPosition(windowSize / 2.f);
+
+	title = *initText("Game Over", windowSize.x / 2.f, titlePosY, static_cast<unsigned int>(80.f * scaleFactor.y), sf::Color(208, 0 ,0));
+	view = *initText("View Board", windowSize.x / 2.f, windowSize.y / 2.f - 5.f * borderThickness + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	restart = *initText("Play Again", windowSize.x / 2.f, windowSize.y / 2.f + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	mainMenu = *initText("Main Menu", windowSize.x / 2.f, windowSize.y / 2.f + 5.f * borderThickness + title.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+
+	options.push_back(make_shared<sf::Text>(view));
+	options.push_back(make_shared<sf::Text>(restart));
+	options.push_back(make_shared<sf::Text>(mainMenu));
 }
