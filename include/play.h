@@ -5,28 +5,31 @@
 #include "mainMenu.h"
 #include "snake.h"
 
-#include<vector>
-#include<queue>
-#include<deque>
-#include<SFML/Graphics.hpp>
-#include<SFML/Window.hpp>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <Thor/Shapes.hpp>
 
 using namespace std;
 
 class Play : public State {
 private:
 	shared_ptr<GameContainer> gameContainer;
-	sf::Vector2f scaleFactor;
 	sf::Sprite wall;
 	sf::Sprite grass;
 	sf::Sprite food;
 	unique_ptr<Snake> snake;
+	sf::Vector2f scaleFactor;
 
 	vector<vector<sf::Sprite>> grid;
+	int gridWidth, gridHeight;
+
 	vector<sf::Vector2i> foodLocations;
 	sf::Vector2i foodPosition;
+
 	queue<Snake::Direction> directionQueue;
-	int gridWidth, gridHeight;
 	bool paused;
 
 	void loadTextures();
@@ -45,4 +48,31 @@ public:
 	void render() override;
 	void pause() override;
 	void resume() override;
+};
+
+class Paused : public State {
+private:
+	shared_ptr<GameContainer> gameContainer;
+	sf::ConvexShape popupBody;
+	sf::Text pausedTitle;
+	sf::Text resume;
+	sf::Text restart;
+	sf::Text mainMenu;
+
+	vector<shared_ptr<sf::Text>> pauseOptions;
+	bool usingMouse;
+	int selectedPauseOptions;
+
+	shared_ptr<sf::Text> initText(const string& textString, float positionX, float positionY, unsigned int charSize);
+	void handleMouseEvent(sf::Event& event);
+	void handleKeyEvent(sf::Event& event);
+
+public:
+	Paused(shared_ptr<GameContainer>& gameContainer);
+	~Paused();
+
+	void init() override;
+	void handleInput() override;
+	void update() override;
+	void render() override;
 };

@@ -7,7 +7,7 @@ Play::Play(shared_ptr<GameContainer>& gameContainer)
 }
 
 Play::~Play() {
-
+	
 }
 
 void Play::init() {
@@ -150,6 +150,7 @@ void Play::placeFood() {
 	foodPosition = foodLocations[index];
 	removeFoodLocation(foodPosition);
 	food.setPosition(foodPosition.x * 30 * scaleFactor.x, foodPosition.y * 30 * scaleFactor.y);
+	food.setColor(sf::Color(255, 255, 255, 255));
 }
 
 void Play::addFoodLocation(sf::Vector2i position) {
@@ -171,8 +172,7 @@ void Play::handleInput() {
 		}
 		else if (event.type == sf::Event::KeyPressed) {
 			if (event.key.code == sf::Keyboard::Escape) {
-				gameContainer->stateManager->popState();
-				gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer));
+				gameContainer->stateManager->pushState(make_unique<Paused>(gameContainer));
 			}
 			else if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
 				directionQueue.push(Snake::Direction::RIGHT);
@@ -191,6 +191,8 @@ void Play::handleInput() {
 }
 
 void Play::update() {
+	if (paused) return;
+
 	if (!directionQueue.empty()) {
 		Snake::Direction newDirection = directionQueue.front();
 		directionQueue.pop();
@@ -236,4 +238,154 @@ void Play::pause() {
 
 void Play::resume() {
 	paused = false;
+}
+
+
+Paused::Paused(shared_ptr<GameContainer>& gameContainer) 
+	: gameContainer(gameContainer), selectedPauseOptions(-1), usingMouse(false) {
+}
+
+Paused::~Paused() {
+	
+}
+
+void Paused::init() {
+	const sf::Vector2f windowSize(gameContainer->window->getSize());
+	const sf::Vector2f baseResolution(1920.f, 1080.f);
+	const sf::Vector2f scaleFactor(windowSize.x / baseResolution.x, windowSize.y / baseResolution.y);
+	const float maxScaleFactor = max(scaleFactor.x, scaleFactor.y);
+	const float borderThickness = 18.f * maxScaleFactor;
+	const float titlePosY = windowSize.y / 4.f + borderThickness * 3.5f;
+
+	const sf::Vector2f popupBodySize(windowSize / 2.f);
+	popupBody = thor::Shapes::roundedRect(popupBodySize, 120.f * maxScaleFactor, sf::Color(65, 105, 225), borderThickness, sf::Color::White);
+	popupBody.setOrigin(popupBodySize / 2.f);
+	popupBody.setPosition(windowSize / 2.f);
+
+	pausedTitle = *initText("Paused", windowSize.x / 2.f, titlePosY, static_cast<unsigned int>(80.f * scaleFactor.y));
+	resume = *initText("Resume", windowSize.x / 2.f, windowSize.y / 2.f - 5.f * borderThickness + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	restart = *initText("Restart Game", windowSize.x / 2.f, windowSize.y / 2.f + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	mainMenu = *initText("Main Menu", windowSize.x / 2.f, windowSize.y / 2.f + 5.f * borderThickness + pausedTitle.getGlobalBounds().height / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+
+	pauseOptions.push_back(make_shared<sf::Text>(resume));
+	pauseOptions.push_back(make_shared<sf::Text>(restart));
+	pauseOptions.push_back(make_shared<sf::Text>(mainMenu));
+}
+
+shared_ptr<sf::Text> Paused::initText(const string& textString, float positionX, float positionY, unsigned int charSize) {
+	auto text = make_shared<sf::Text>();
+	text->setFont(gameContainer->assetManager->getFont("MAIN-FONT"));
+	text->setString(textString);
+	text->setCharacterSize(charSize);
+	text->setFillColor(sf::Color::White);
+	text->setOrigin(text->getLocalBounds().left + text->getLocalBounds().width / 2.f, text->getLocalBounds().top + text->getLocalBounds().height / 2.f);
+	text->setPosition(positionX, positionY);
+	return text;
+}
+
+void Paused::handleInput() {
+	sf::Event event;
+
+	while (gameContainer->window->pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			gameContainer->window->close();
+		}
+		else if (event.type == sf::Event::MouseMoved || event.type == sf::Event::MouseButtonPressed) {
+			handleMouseEvent(event);
+		}
+		else if (event.type == sf::Event::KeyPressed) {
+			handleKeyEvent(event);
+		}
+	}
+}
+
+void Paused::handleMouseEvent(sf::Event& event) {
+	sf::Vector2f mousePosition = gameContainer->window->mapPixelToCoords(sf::Mouse::getPosition(*gameContainer->window));
+	bool hovering = false;
+
+	for (int i = 0; i < pauseOptions.size(); i++) {
+		if (pauseOptions[i]->getGlobalBounds().contains(mousePosition)) {
+			selectedPauseOptions = i;
+			usingMouse = true;
+			hovering = true;
+
+			if (event.mouseButton.button == sf::Mouse::Left) {
+				if (selectedPauseOptions == 0) {
+					gameContainer->stateManager->popState();
+				}
+				else if (selectedPauseOptions == 1) {
+					gameContainer->stateManager->pushState(make_unique<Play>(gameContainer), true);
+				}
+				else if (selectedPauseOptions == pauseOptions.size() - 1) {
+					gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer), true);
+				}
+			}
+
+			break;
+		}
+	}
+
+	if (!hovering && usingMouse) {
+		selectedPauseOptions = -1;
+	}
+}
+
+void Paused::handleKeyEvent(sf::Event& event) {
+	switch (event.key.code) {
+	case sf::Keyboard::Up:
+	case sf::Keyboard::W:
+		usingMouse = false;
+		if (selectedPauseOptions > 0) {
+			selectedPauseOptions--;
+		}
+		else if (selectedPauseOptions == -1 || selectedPauseOptions == 0) {
+			selectedPauseOptions = static_cast<int>(pauseOptions.size()) - 1;
+		}
+		break;
+	case sf::Keyboard::Down:
+	case sf::Keyboard::S:
+		usingMouse = false;
+		if (selectedPauseOptions < pauseOptions.size() - 1) {
+			selectedPauseOptions++;
+		}
+		else if (selectedPauseOptions == -1 || selectedPauseOptions == pauseOptions.size() - 1) {
+			selectedPauseOptions = 0;
+		}
+		break;
+	case sf::Keyboard::Enter:
+		if (selectedPauseOptions == 0) {
+			gameContainer->stateManager->popState();
+		}
+		else if (selectedPauseOptions == 1) {
+			gameContainer->stateManager->pushState(make_unique<Play>(gameContainer), true);
+		}
+		else if (selectedPauseOptions == pauseOptions.size() - 1) {
+			gameContainer->stateManager->pushState(make_unique<MainMenu>(gameContainer), true);
+		}
+		break;
+	case sf::Keyboard::Escape:
+		gameContainer->stateManager->popState();
+	default:
+		break;
+	}
+}
+
+void Paused::update() {
+	for (int i = 0; i < pauseOptions.size(); i++) {
+		if (i == selectedPauseOptions) {
+			pauseOptions[i]->setFillColor(sf::Color::Red);
+		}
+		else {
+			pauseOptions[i]->setFillColor(sf::Color::White);
+		}
+	}
+}
+
+void Paused::render() {
+	gameContainer->window->draw(popupBody);
+	gameContainer->window->draw(pausedTitle);
+	for (auto& text : pauseOptions) {
+		gameContainer->window->draw(*text);
+	}
+	gameContainer->window->display();
 }

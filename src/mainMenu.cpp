@@ -123,7 +123,7 @@ void MainMenu::handleKeyEvent(sf::Event& event) {
 			gameContainer->stateManager->popState();
 			gameContainer->stateManager->pushState(make_unique<Play>(gameContainer));
 		}
-		if (selectedMenuOption == 1) {
+		else if (selectedMenuOption == 1) {
 			gameContainer->stateManager->pushState(make_unique<HighScore>(gameContainer));
 			keyClock.restart();
 		}
@@ -169,7 +169,7 @@ void MainMenu::resume() {
 
 
 HighScore::HighScore(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer), hovering(false) {
+	: gameContainer(gameContainer), hovering(false) {
 }
 
 HighScore::~HighScore() {

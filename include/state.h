@@ -25,12 +25,13 @@ private:
 	
 	bool push;
 	bool pop;
+	bool clear;
 	
 public:
 	StateManager();
 	~StateManager();
 
-	void pushState(unique_ptr<State> newState);
+	void pushState(unique_ptr<State> newState, bool clear = false);
 	void popState();
 	void changeState();
 	unique_ptr<State>& getCurrentState();

@@ -1,7 +1,7 @@
 #include "../include/state.h"
 
 StateManager::StateManager() 
-	: push(false), pop(false) {
+	: push(false), pop(false), clear(false) {
 
 }
 
@@ -9,8 +9,9 @@ StateManager::~StateManager() {
 
 }
 
-void StateManager::pushState(unique_ptr<State> newState) {
+void StateManager::pushState(unique_ptr<State> newState, bool clear) {
 	push = true;
+	this->clear = clear;
 	this->newState = move(newState);
 }
 
@@ -32,6 +33,13 @@ void StateManager::changeState() {
 	}
 
 	if (push) {
+		if (clear) {
+			while (!stateStack.empty()) {
+				stateStack.pop_back();
+			}
+			clear = false;
+		}
+
 		if (!stateStack.empty()) {
 			stateStack.back()->pause();
 		}
