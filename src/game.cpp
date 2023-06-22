@@ -27,8 +27,15 @@ void Game::open() {
         
         gameContainer->stateManager->changeState();
         gameContainer->stateManager->getCurrentState()->handleInput();
-        while (timeSinceLastUpdate > timePerFrame) {
-            timeSinceLastUpdate -= timePerFrame;
+        if (gameContainer->stateManager->getCurrentState()->getType() == "Play") {
+            sf::Time elapsedTime = clock.restart();
+            while (timeSinceLastUpdate > timePerFrame) {
+                timeSinceLastUpdate -= timePerFrame;
+                gameContainer->stateManager->getCurrentState()->update();
+            }
+        }
+        else {
+            timeSinceLastUpdate = sf::Time::Zero;
             gameContainer->stateManager->getCurrentState()->update();
         }
         gameContainer->stateManager->getCurrentState()->render();

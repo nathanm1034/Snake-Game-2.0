@@ -48,6 +48,8 @@ public:
 	void render() override;
 	void pause() override;
 	void resume() override;
+
+	string getType() override { return "Play"; }
 };
 
 class Paused : public State {

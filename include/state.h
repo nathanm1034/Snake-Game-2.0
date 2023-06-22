@@ -14,8 +14,10 @@ public:
 	virtual void handleInput() = 0;
 	virtual void update() = 0;
 	virtual void render() = 0;
-	virtual void pause() {};
-	virtual void resume() {};
+	virtual void pause() {}
+	virtual void resume() {}
+
+	virtual string getType() { return "State"; }
 };
 
 class StateManager {
