@@ -4,6 +4,7 @@
 #include "state.h"
 #include "mainMenu.h"
 #include "snake.h"
+#include "save.h"
 
 #include <vector>
 #include <queue>
@@ -21,6 +22,7 @@ private:
 	sf::Sprite grass;
 	sf::Sprite food;
 	unique_ptr<Snake> snake;
+	sf::Text scoreText;
 	sf::Vector2f scaleFactor;
 
 	vector<vector<sf::Sprite>> grid;
@@ -29,6 +31,7 @@ private:
 	vector<sf::Vector2i> foodLocations;
 	sf::Vector2i foodPosition;
 
+	int score;
 	queue<Snake::Direction> directionQueue;
 	bool gameOver;
 	bool gameOverInitial;

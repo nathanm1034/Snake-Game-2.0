@@ -201,7 +201,7 @@ void HighScore::init() {
 
 	closeText = *initText("x", closePosition.x, closePosition.y, static_cast<unsigned int>(50.f * scaleFactor.y));
 	highScoreTitle = *initText("HighScore", windowSize.x / 2.f, titlePosY, static_cast<unsigned int>(80.f * scaleFactor.y));
-	highScore = *initText("0", windowSize.x / 2.f, windowSize.y / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
+	highScore = *initText(to_string(getHighScore()), windowSize.x / 2.f, windowSize.y / 2.f, static_cast<unsigned int>(65.f * scaleFactor.y));
 }
 
 shared_ptr<sf::Text> HighScore::initText(const string& textString, float positionX, float positionY, unsigned int charSize) {

@@ -1,13 +1,15 @@
 #include "../include/play.h"
 
 Play::Play(shared_ptr<GameContainer>& gameContainer) 
-	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), gameOver(false), gameOverInitial(false), paused(false) {
+	:gameContainer(gameContainer), gridWidth(32), gridHeight(18), score(0), gameOver(false), gameOverInitial(false), paused(false) {
 	scaleFactor.x = gameContainer->window->getSize().x / 960.f;
 	scaleFactor.y = gameContainer->window->getSize().y / 540.f;
 }
 
 Play::~Play() {
-	
+	if (score > getHighScore()) {
+		saveHighScore(score);
+	}
 }
 
 void Play::init() {
@@ -50,6 +52,13 @@ void Play::init() {
 	}
 
 	placeFood();
+
+	scoreText.setFont(gameContainer->assetManager->getFont("MAIN-FONT"));
+	scoreText.setString("Score: " + to_string(score));
+	scoreText.setCharacterSize(static_cast<unsigned int>(30.f * scaleFactor.y));
+	scoreText.setFillColor(sf::Color::White);
+	scoreText.setOrigin(scoreText.getLocalBounds().left - scoreText.getLocalBounds().width / 32.f, scoreText.getLocalBounds().top + scoreText.getLocalBounds().height / 2.f);
+	scoreText.setPosition(0.f, 30.f * scaleFactor.y / 2);
 }
 
 void Play::loadTextures() {
@@ -231,6 +240,8 @@ void Play::update() {
 
 	if (head == foodPosition) {
 		placeFood();
+		score++;
+		scoreText.setString("Score: " + to_string(score));
 		//grow
 	}
 }
@@ -246,6 +257,7 @@ void Play::render() {
 	for (const auto& segment : snake->getBody()) {
 		gameContainer->window->draw(segment.getSprite());
 	}
+	gameContainer->window->draw(scoreText);
 	gameContainer->window->display();
 }
 
